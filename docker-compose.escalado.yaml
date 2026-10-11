@@ -1,0 +1,9 @@
+# Overlay opcional para pruebas de escalabilidad horizontal con Docker Compose >= 2.24.
+# Deshabilita puertos de host fijos para permitir múltiples réplicas por servicio.
+services:
+  cuentas-service:
+    ports: !reset []
+  pagos-service:
+    ports: !reset []
+  clientes-service:
+    ports: !reset []

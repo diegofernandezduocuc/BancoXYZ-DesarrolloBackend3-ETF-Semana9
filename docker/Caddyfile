@@ -1,0 +1,17 @@
+# TLS de laboratorio con autoridad de certificados local de Caddy.
+localhost:443, 127.0.0.1:443 {
+    tls internal
+    @web path /api/web/*
+    handle @web {
+        reverse_proxy bff-web:8081
+    }
+    @mobile path /api/mobile/*
+    handle @mobile {
+        reverse_proxy bff-mobile:8082
+    }
+    @atm path /api/atm/*
+    handle @atm {
+        reverse_proxy bff-atm:8083
+    }
+    respond "No encontrado" 404
+}

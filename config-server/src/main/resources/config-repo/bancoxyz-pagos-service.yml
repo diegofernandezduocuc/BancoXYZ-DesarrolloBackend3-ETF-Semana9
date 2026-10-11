@@ -1,0 +1,8 @@
+server:
+  port: 8086
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      cuentasService:
+        ignore-exception-predicate: cl.duoc.bancoxyz.pagos.PagosController$BusinessFailurePredicate

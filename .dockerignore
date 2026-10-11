@@ -1,0 +1,12 @@
+.git
+.idea
+.vscode
+**/target
+EVIDENCIAS
+*.log
+.env
+.env.*
+
+
+**/.env
+**/.env.*

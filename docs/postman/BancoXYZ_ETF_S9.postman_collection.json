@@ -1,0 +1,305 @@
+{
+  "info": {
+    "name": "Banco XYZ ETF Semana 9 - Verificacion local",
+    "description": "Coleccion de comprobaciones no destructivas para servicios locales. No incluye credenciales, tokens ni operaciones de escritura. Para endpoints autorizados, crea dos secretos en Postman Local Vault: bancoxyz-oauth-secret y bancoxyz-access-token. Nunca compartas ni exportes sus valores. Requiere que el stack Docker este funcionando. Las expectativas son propuestas y deben comprobarse en el entorno local.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{vault:bancoxyz-access-token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "auth_url",
+      "value": "http://localhost:9000"
+    },
+    {
+      "key": "client_id",
+      "value": "bancoxyz-client"
+    },
+    {
+      "key": "web_url",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "mobile_url",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "atm_url",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "core_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "cuentas_url",
+      "value": "http://localhost:8085"
+    },
+    {
+      "key": "account_id",
+      "value": "106"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Autenticacion",
+      "item": [
+        {
+          "name": "Obtener JWT client_credentials",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{auth_url}}/oauth2/token",
+            "description": "Configura client_secret de manera local. No exportes ni publiques secretos o tokens.",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{vault:bancoxyz-oauth-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials",
+                  "type": "text"
+                },
+                {
+                  "key": "scope",
+                  "value": "bank.read bank.write web.read mobile.read atm.read atm.write audit.read",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 Seguridad sin token (no destructivo)",
+      "item": [
+        {
+          "name": "BFF Web - debe rechazar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{web_url}}/api/web/cuentas",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "BFF Mobile - debe rechazar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{mobile_url}}/api/mobile/cuentas",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "BFF ATM - debe rechazar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{atm_url}}/api/atm/cuentas/{{account_id}}/saldo",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Consultas con JWT (no destructivo)",
+      "item": [
+        {
+          "name": "BFF Web - lista cuentas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{web_url}}/api/web/cuentas",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "BFF Mobile - lista cuentas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{mobile_url}}/api/mobile/cuentas",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "BFF ATM - saldo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{atm_url}}/api/atm/cuentas/{{account_id}}/saldo",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Backend Core - cuentas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{core_url}}/api/backend/cuentas",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cuentas - cuenta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{cuentas_url}}/api/cuentas/{{account_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
